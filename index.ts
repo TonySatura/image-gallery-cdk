@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
+import * as s3 from "@aws-cdk/aws-s3";
 import { ImageGalleryUiStack } from './lib/image-gallery-ui-stack'
 import { ImageGalleryStackProps } from './lib/image-gallery-stack-props';
+import { ImageGalleryPipelineStack } from './lib/image-gallery-pipeline-stack';
 
 const app = new cdk.App();
 
 const stackProps: ImageGalleryStackProps = {
-    description: '',
-    branchName: '',
-    rootDomain: '',
-    baseDomain: '',
-    env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: "eu-central-1" },
+    siteBucket: undefined,
+    env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION  },
     tags: {
     //   service: "n/a",
     //   name: "awsome-list",
@@ -27,3 +26,4 @@ const stackProps: ImageGalleryStackProps = {
   };
 
 const uiStack = new ImageGalleryUiStack(app, 'ImageGalleryUiStack', stackProps);
+const pipelineStack = new ImageGalleryPipelineStack(app, 'ImageGalleryPipelineStack', stackProps);

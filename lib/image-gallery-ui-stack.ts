@@ -30,6 +30,7 @@ export class ImageGalleryUiStack extends cdk.Stack {
             publicReadAccess: true,
             removalPolicy: RemovalPolicy.DESTROY
         });
+        props.siteBucket = siteBucket;
 
         const siteDistribution = new cloudfront.CloudFrontWebDistribution(this, "image-gallery-siteDistribution", {
             comment: "Website distribution for " + siteBucket.bucketName,
