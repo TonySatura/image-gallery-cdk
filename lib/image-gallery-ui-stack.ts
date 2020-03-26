@@ -11,57 +11,67 @@ import { ImageGalleryStackProps } from "./image-gallery-stack-props";
 import { RemovalPolicy } from "@aws-cdk/core";
 
 export class ImageGalleryUiStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props: ImageGalleryStackProps) {
-        super(scope, id, props);
+  public siteBucket: s3.Bucket;
 
-        // const hostedZone = route53.HostedZone.fromLookup(this, "AwsomeList-RootDomainZone", {
-        //     domainName: props.rootDomain
-        // });
+  constructor(scope: cdk.Construct, id: string, props: ImageGalleryStackProps) {
+    super(scope, id, props);
 
-        const siteBucket = new s3.Bucket(this, "image-gallery-site", {
-            blockPublicAccess: {
-                blockPublicAcls: true,
-                ignorePublicAcls: true,
-                blockPublicPolicy: false,
-                restrictPublicBuckets: false
-              },
-            websiteIndexDocument: "index.html",
-            //websiteErrorDocument: "error.html",
-            publicReadAccess: true,
-            removalPolicy: RemovalPolicy.DESTROY
-        });
-        props.siteBucket = siteBucket;
+    // const hostedZone = route53.HostedZone.fromLookup(this, "AwsomeList-RootDomainZone", {
+    //     domainName: props.rootDomain
+    // });
 
-        const siteDistribution = new cloudfront.CloudFrontWebDistribution(this, "image-gallery-siteDistribution", {
-            comment: "Website distribution for " + siteBucket.bucketName,
-            // aliasConfiguration: {
-            //     acmCertRef: certificateArn,
-            //     names: [uiSiteDomain],
-            //     sslMethod: cloudfront.SSLMethod.SNI,
-            //     securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2018
-            // },
-            originConfigs: [
-                {
-                    s3OriginSource: {
-                        s3BucketSource: siteBucket
-                    },
-                    behaviors: [{ isDefaultBehavior: true }]
-                }
-            ],
-            errorConfigurations: [
-                {
-                    errorCode: 403,
-                    errorCachingMinTtl: 300,
-                    responsePagePath: "/index.html",
-                    responseCode: 200
-                },
-                {
-                    errorCode: 404,
-                    errorCachingMinTtl: 300,
-                    responsePagePath: "/index.html",
-                    responseCode: 200
-                }
-            ]
-        });
-    }
+    const siteBucket = new s3.Bucket(this, "site", {
+      blockPublicAccess: {
+        blockPublicAcls: true,
+        ignorePublicAcls: true,
+        blockPublicPolicy: false,
+        restrictPublicBuckets: false
+      },
+      websiteIndexDocument: "index.html",
+      //websiteErrorDocument: "error.html",
+      publicReadAccess: true,
+      removalPolicy: RemovalPolicy.DESTROY
+    });
+    this.siteBucket = siteBucket;
+
+    const siteDistribution = new cloudfront.CloudFrontWebDistribution(
+      this,
+      "siteDistribution",
+      {
+        comment: "Website distribution for " + props.appName,
+        // aliasConfiguration: {
+        //     acmCertRef: certificateArn,
+        //     names: [uiSiteDomain],
+        //     sslMethod: cloudfront.SSLMethod.SNI,
+        //     securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2018
+        // },
+        originConfigs: [
+          {
+            s3OriginSource: {
+              s3BucketSource: siteBucket
+            },
+            behaviors: [{ isDefaultBehavior: true }]
+          }
+        ],
+        errorConfigurations: [
+          {
+            errorCode: 403,
+            errorCachingMinTtl: 300,
+            responsePagePath: "/index.html",
+            responseCode: 200
+          },
+          {
+            errorCode: 404,
+            errorCachingMinTtl: 300,
+            responsePagePath: "/index.html",
+            responseCode: 200
+          }
+        ]
+      }
+    );
+
+    new cdk.CfnOutput(this, "SiteURL", {
+      value: "https://" + siteDistribution.domainName
+    });
+  }
 }
