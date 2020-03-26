@@ -9,6 +9,7 @@ import * as codepipelineActions from "@aws-cdk/aws-codepipeline-actions";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
 import { ImageGalleryStackProps } from "./image-gallery-stack-props";
 import { RemovalPolicy } from "@aws-cdk/core";
+import { PriceClass } from "@aws-cdk/aws-cloudfront";
 
 export class ImageGalleryUiStack extends cdk.Stack {
   public siteBucket: s3.Bucket;
@@ -39,6 +40,7 @@ export class ImageGalleryUiStack extends cdk.Stack {
       "siteDistribution",
       {
         comment: "Website distribution for " + props.appName,
+        priceClass: PriceClass.PRICE_CLASS_ALL,
         // aliasConfiguration: {
         //     acmCertRef: certificateArn,
         //     names: [uiSiteDomain],
