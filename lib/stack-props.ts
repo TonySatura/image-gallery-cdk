@@ -3,13 +3,15 @@ import * as s3 from "@aws-cdk/aws-s3";
 
 export interface BaseStackProps extends cdk.StackProps {
   appName: string;
-  stage: EnvironmentStage;
-  repository: RepositoryProps;
 }
 
-export interface UiStackProps extends BaseStackProps {}
+export interface UiStackProps extends BaseStackProps {
+  domain: string;
+  subdomain: string;
+}
 
 export interface PipelineStackProps extends BaseStackProps {
+  repository: RepositoryProps;
   siteBucket: s3.Bucket;
 }
 
@@ -20,7 +22,6 @@ export interface RepositoryProps {
 }
 
 export enum EnvironmentStage {
-  DEV = "development",
-  STAGING = "staging",
-  PRODUCTION = "production"
+  DEVELOPMENT = "dev",
+  PRODUCTION = "prod"
 }

@@ -6,44 +6,48 @@ import {
   BaseStackProps,
   PipelineStackProps,
   UiStackProps,
-  EnvironmentStage
+  EnvironmentStage,
+  RepositoryProps
 } from "./lib/stack-props";
 import { PipelineStack } from "./lib/pipeline.stack";
 
-const app = new cdk.App();
+//#region === Initialise stack props ===
+const environment = EnvironmentStage.DEVELOPMENT;
+const appName = "image-gallery-" + environment;
+const domain = "satura.de";
+const subdomain = "ig";
 
-const appName = "image-gallery";
-const branch = "master";
-const environmentStage = "production";
+const repository: RepositoryProps = {
+  owner: "TonySatura",
+  name: "image-gallery-ng",
+  branch: "master"
+};
 
-const stackProps: BaseStackProps = {
+const baseStackProps: BaseStackProps = {
   appName: appName,
-  stage: EnvironmentStage.PRODUCTION,
-  repository: {
-    owner: "TonySatura",
-    name: "image-gallery-ng",
-    branch: branch
-  },
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION
   },
   tags: {
-    name: appName,
-    environment: environmentStage,
-    owner: "t.satura@icloud.com",
-    branch: branch
+    name: repository.name,
+    environment: environment,
+    owner: repository.owner,
+    branch: repository.branch
   }
 };
+//#endregion
 
-const uiStackProps = stackProps as UiStackProps;
+//#region === Create CDK app ===
+const app = new cdk.App();
+
+const uiStackProps = baseStackProps as UiStackProps;
+uiStackProps.domain = domain;
+uiStackProps.subdomain = subdomain;
 const uiStack = new UiStack(app, appName + "-ui", uiStackProps);
 
-const pipelineStackProps = stackProps as PipelineStackProps;
+const pipelineStackProps = baseStackProps as PipelineStackProps;
+pipelineStackProps.repository = repository;
 pipelineStackProps.siteBucket = uiStack.siteBucket;
-
-const pipelineStack = new PipelineStack(
-  app,
-  appName + "-pipeline",
-  pipelineStackProps
-);
+new PipelineStack(app, appName + "-pipeline", pipelineStackProps);
+//#endregion
