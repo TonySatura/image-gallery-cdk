@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "@aws-cdk/core";
-import { ImageGalleryUiStack } from "./lib/image-gallery-ui-stack";
-import { ImageGalleryStackProps } from "./lib/image-gallery-stack-props";
-import { ImageGalleryPipelineStack } from "./lib/image-gallery-pipeline-stack";
+import { UiStack } from "./lib/ui.stack";
+import {
+  BaseStackProps,
+  PipelineStackProps,
+  UiStackProps,
+  EnvironmentStage
+} from "./lib/stack-props";
+import { PipelineStack } from "./lib/pipeline.stack";
 
 const app = new cdk.App();
 
@@ -11,8 +16,9 @@ const appName = "image-gallery";
 const branch = "master";
 const environmentStage = "production";
 
-const stackProps: ImageGalleryStackProps = {
+const stackProps: BaseStackProps = {
   appName: appName,
+  stage: EnvironmentStage.PRODUCTION,
   repository: {
     owner: "TonySatura",
     name: "image-gallery-ng",
@@ -30,10 +36,14 @@ const stackProps: ImageGalleryStackProps = {
   }
 };
 
-const uiStack = new ImageGalleryUiStack(app, appName + "-ui", stackProps);
-const pipelineStack = new ImageGalleryPipelineStack(
+const uiStackProps = stackProps as UiStackProps;
+const uiStack = new UiStack(app, appName + "-ui", uiStackProps);
+
+const pipelineStackProps = stackProps as PipelineStackProps;
+pipelineStackProps.siteBucket = uiStack.siteBucket;
+
+const pipelineStack = new PipelineStack(
   app,
   appName + "-pipeline",
-  stackProps,
-  uiStack.siteBucket
+  pipelineStackProps
 );

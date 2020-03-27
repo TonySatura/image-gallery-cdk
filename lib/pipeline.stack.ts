@@ -2,17 +2,11 @@ import * as cdk from "@aws-cdk/core";
 import * as codebuild from "@aws-cdk/aws-codebuild";
 import * as codepipeline from "@aws-cdk/aws-codepipeline";
 import * as codepipelineActions from "@aws-cdk/aws-codepipeline-actions";
-import * as s3 from "@aws-cdk/aws-s3";
-import { ImageGalleryStackProps } from "./image-gallery-stack-props";
+import { PipelineStackProps } from "./stack-props";
 import { GitHubTrigger } from "@aws-cdk/aws-codepipeline-actions";
 
-export class ImageGalleryPipelineStack extends cdk.Stack {
-  constructor(
-    scope: cdk.Construct,
-    id: string,
-    props: ImageGalleryStackProps,
-    siteBucket: s3.Bucket
-  ) {
+export class PipelineStack extends cdk.Stack {
+  constructor(scope: cdk.Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
     const pipeline = new codepipeline.Pipeline(this, "pipeline", {
@@ -50,10 +44,7 @@ export class ImageGalleryPipelineStack extends cdk.Stack {
       }
     });
 
-    const codeBuildProject = new codebuild.PipelineProject(
-      this,
-      props.appName + "-codebuild"
-    );
+    const codeBuildProject = new codebuild.PipelineProject(this, "codebuild");
 
     const angularBuildAction = new codepipelineActions.CodeBuildAction({
       actionName: "AngularBuild",
@@ -76,7 +67,7 @@ export class ImageGalleryPipelineStack extends cdk.Stack {
     const s3deploy = new codepipelineActions.S3DeployAction({
       actionName: "S3Deploy",
       input: buildArtifact,
-      bucket: siteBucket
+      bucket: props.siteBucket
     });
 
     deployStage.addAction(s3deploy);

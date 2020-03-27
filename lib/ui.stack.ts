@@ -7,14 +7,14 @@ import * as route53targets from "@aws-cdk/aws-route53-targets/lib";
 import * as codepipeline from "@aws-cdk/aws-codepipeline";
 import * as codepipelineActions from "@aws-cdk/aws-codepipeline-actions";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import { ImageGalleryStackProps } from "./image-gallery-stack-props";
+import { UiStackProps } from "./stack-props";
 import { RemovalPolicy } from "@aws-cdk/core";
 import { PriceClass } from "@aws-cdk/aws-cloudfront";
 
-export class ImageGalleryUiStack extends cdk.Stack {
+export class UiStack extends cdk.Stack {
   public siteBucket: s3.Bucket;
 
-  constructor(scope: cdk.Construct, id: string, props: ImageGalleryStackProps) {
+  constructor(scope: cdk.Construct, id: string, props: UiStackProps) {
     super(scope, id, props);
 
     // const hostedZone = route53.HostedZone.fromLookup(this, "AwsomeList-RootDomainZone", {
@@ -37,7 +37,7 @@ export class ImageGalleryUiStack extends cdk.Stack {
 
     const siteDistribution = new cloudfront.CloudFrontWebDistribution(
       this,
-      "siteDistribution",
+      "site-distribution",
       {
         comment: "Website distribution for " + props.appName,
         priceClass: PriceClass.PRICE_CLASS_ALL,
