@@ -11,17 +11,33 @@ import {
 } from "./lib/stack-props";
 import { PipelineStack } from "./lib/pipeline.stack";
 
-//#region === Initialise stack props ===
-const environment = EnvironmentStage.DEVELOPMENT;
-const appName = "image-gallery-" + environment;
-const domain = "satura.de";
-const subdomain = "ig";
+//#region === Initialise CDK app and context variables ===
+const app = new cdk.App();
+var branchName = app.node.tryGetContext("branch");
+if (!branchName) {
+  branchName = "master";
+}
+//#endregion
+
+//#region === Define basic information ===
+var appName = "image-gallery";
+var domain = "satura.de";
+var subdomain = "";
 
 const repository: RepositoryProps = {
   owner: "TonySatura",
   name: "image-gallery-ng",
-  branch: "master"
+  branch: branchName
 };
+//#endregion
+
+//#region === Create CDK stacks ===
+var environment = EnvironmentStage.PRODUCTION;
+if (branchName !== "master") {
+  appName = appName + "-" + branchName;
+  subdomain = branchName;
+  environment = EnvironmentStage.DEVELOPMENT;
+}
 
 const baseStackProps: BaseStackProps = {
   appName: appName,
@@ -30,16 +46,13 @@ const baseStackProps: BaseStackProps = {
     region: process.env.CDK_DEFAULT_REGION
   },
   tags: {
-    name: repository.name,
+    name: appName,
     environment: environment,
+    repository: repository.name,
     owner: repository.owner,
     branch: repository.branch
   }
 };
-//#endregion
-
-//#region === Create CDK app ===
-const app = new cdk.App();
 
 const uiStackProps = baseStackProps as UiStackProps;
 uiStackProps.domain = domain;
