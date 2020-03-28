@@ -12,7 +12,7 @@ import { RemovalPolicy } from "@aws-cdk/core";
 import { PriceClass } from "@aws-cdk/aws-cloudfront";
 
 export class UiStack extends cdk.Stack {
-  public siteBucket: s3.Bucket;
+  public readonly siteBucket: s3.Bucket;
 
   constructor(scope: cdk.Construct, id: string, props: UiStackProps) {
     super(scope, id, props);

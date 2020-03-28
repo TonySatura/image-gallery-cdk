@@ -2,6 +2,7 @@
 import "source-map-support/register";
 import * as cdk from "@aws-cdk/core";
 import { UiStack } from "./lib/ui.stack";
+import { PipelineStack } from "./lib/pipeline.stack";
 import {
   BaseStackProps,
   PipelineStackProps,
@@ -9,17 +10,14 @@ import {
   EnvironmentStage,
   RepositoryProps
 } from "./lib/stack-props";
-import { PipelineStack } from "./lib/pipeline.stack";
+import { ImageBucketStack } from "./lib/image-bucket.stack";
 
-//#region === Initialise CDK app and context variables ===
 const app = new cdk.App();
 var branchName = app.node.tryGetContext("branch");
 if (!branchName) {
   branchName = "master";
 }
-//#endregion
 
-//#region === Define basic information ===
 var appName = "image-gallery";
 var domain = "satura.de";
 var subdomain = "";
@@ -29,9 +27,7 @@ const repository: RepositoryProps = {
   name: "image-gallery-ng",
   branch: branchName
 };
-//#endregion
 
-//#region === Create CDK stacks ===
 var environment = EnvironmentStage.PRODUCTION;
 if (branchName !== "master") {
   appName = appName + "-" + branchName;
@@ -54,6 +50,12 @@ const baseStackProps: BaseStackProps = {
   }
 };
 
+// const imageBucketStack = new ImageBucketStack(
+//   app,
+//   appName + "imagebucket",
+//   baseStackProps
+// );
+
 const uiStackProps = baseStackProps as UiStackProps;
 uiStackProps.domain = domain;
 uiStackProps.subdomain = subdomain;
@@ -63,4 +65,3 @@ const pipelineStackProps = baseStackProps as PipelineStackProps;
 pipelineStackProps.repository = repository;
 pipelineStackProps.siteBucket = uiStack.siteBucket;
 new PipelineStack(app, appName + "-pipeline", pipelineStackProps);
-//#endregion
