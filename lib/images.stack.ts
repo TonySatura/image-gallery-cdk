@@ -13,7 +13,7 @@ export class ImagesStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: BaseStackProps) {
     super(scope, id, props);
 
-    const imageBucket = new s3.Bucket(this, "bucket-", {
+    const imageBucket = new s3.Bucket(this, "bucket", {
       blockPublicAccess: {
         blockPublicAcls: true,
         ignorePublicAcls: true,
@@ -36,7 +36,7 @@ export class ImagesStack extends cdk.Stack {
     });
 
     const authRole = new iam.Role(this, "authRole", {
-      roleName: props.appName + "_unauth_role",
+      roleName: props.appName + "_auth_role",
       assumedBy: new iam.FederatedPrincipal(
         "cognito-identity.amazonaws.com",
         {

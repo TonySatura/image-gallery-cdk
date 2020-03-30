@@ -20,8 +20,3 @@ export interface RepositoryProps {
   name: string;
   branch: string;
 }
-
-export enum EnvironmentStage {
-  DEVELOPMENT = "dev",
-  PRODUCTION = "prod"
-}

@@ -1,39 +1,40 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "@aws-cdk/core";
+import { ImagesStack } from "./lib/images.stack";
 import { UiStack } from "./lib/ui.stack";
 import { PipelineStack } from "./lib/pipeline.stack";
 import {
   BaseStackProps,
   PipelineStackProps,
   UiStackProps,
-  EnvironmentStage,
   RepositoryProps
 } from "./lib/stack-props";
-import { ImagesStack } from "./lib/images.stack";
+import { MASTER, EnvironmentStage } from "./lib/constants";
+import { config } from "./config";
 
 const app = new cdk.App();
+
 var branchName = app.node.tryGetContext("branch");
 if (!branchName) {
-  branchName = "master";
+  branchName = MASTER;
 }
 
-var appName = "image-gallery";
-var domain = "satura.de";
+var appName = config.appBaseName;
 var subdomain = "";
-
-const repository: RepositoryProps = {
-  owner: "TonySatura",
-  name: "image-gallery-ng",
-  branch: branchName
-};
-
 var environment = EnvironmentStage.PRODUCTION;
-if (branchName !== "master") {
+
+if (branchName !== MASTER) {
   appName = appName + "-" + branchName;
   subdomain = branchName;
   environment = EnvironmentStage.DEVELOPMENT;
 }
+
+const repository: RepositoryProps = {
+  owner: config.gitHubUser,
+  name: config.gitHubRepo,
+  branch: branchName
+};
 
 const baseStackProps: BaseStackProps = {
   appName: appName,
@@ -50,10 +51,10 @@ const baseStackProps: BaseStackProps = {
   }
 };
 
-const imagesStack = new ImagesStack(app, appName + "-images", baseStackProps);
+new ImagesStack(app, appName + "-images", baseStackProps);
 
 const uiStackProps = baseStackProps as UiStackProps;
-uiStackProps.domain = domain;
+uiStackProps.domain = config.domain;
 uiStackProps.subdomain = subdomain;
 const uiStack = new UiStack(app, appName + "-ui", uiStackProps);
 
