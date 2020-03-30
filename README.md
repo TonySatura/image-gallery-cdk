@@ -1,6 +1,6 @@
 # CDK project for image-gallery-ng
 
-This IaC project is used to deploy the infrastructure for [ImageGalleryNg](https://github.com/TonySatura/image-gallery-ng)
+This IaC project is used to deploy the AWS infrastructure for [ImageGalleryNg](https://github.com/TonySatura/image-gallery-ng)
 
 ## Useful commands
 
