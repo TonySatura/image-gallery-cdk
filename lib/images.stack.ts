@@ -5,14 +5,15 @@ import * as cognito from "@aws-cdk/aws-cognito";
 import { RemovalPolicy } from "@aws-cdk/core";
 import { HttpMethods } from "@aws-cdk/aws-s3";
 import { BaseStackProps } from "./stack-props";
+import { Effect } from "@aws-cdk/aws-iam";
 
-export class ImageBucketStack extends cdk.Stack {
+export class ImagesStack extends cdk.Stack {
   public siteBucket: s3.Bucket;
 
   constructor(scope: cdk.Construct, id: string, props: BaseStackProps) {
     super(scope, id, props);
 
-    const imageBucket = new s3.Bucket(this, "images", {
+    const imageBucket = new s3.Bucket(this, "bucket-", {
       blockPublicAccess: {
         blockPublicAcls: true,
         ignorePublicAcls: true,
@@ -30,30 +31,40 @@ export class ImageBucketStack extends cdk.Stack {
     });
 
     const identityPool = new cognito.CfnIdentityPool(this, "identityPool", {
-      identityPoolName: props.appName + "-identityPool",
+      identityPoolName: props.appName.replace("-", "_") + "_identityPool",
       allowUnauthenticatedIdentities: true
-    });
-
-    const unauthPolicy = new iam.Policy(this, "unauthPolicy", {
-      policyName: props.appName + "unauth-policy",
-      statements: [
-        new iam.PolicyStatement({
-          actions: ["s3:ListBucket"],
-          resources: [imageBucket.bucketArn]
-        })
-      ]
     });
 
     const unauthRole = new iam.Role(this, "unauthRole", {
       roleName: props.appName + "_unauth_role",
-      assumedBy: new iam.FederatedPrincipal("cognito-identity.amazonaws.com", {
-        StringEquals: {
-          "cognito-identity.amazonaws.com:aud": identityPool.ref
-        }
-      })
+      assumedBy: new iam.FederatedPrincipal(
+        "cognito-identity.amazonaws.com",
+        {
+          StringEquals: {
+            "cognito-identity.amazonaws.com:aud": identityPool.ref
+          },
+          "ForAnyValue:StringLike": {
+            "cognito-identity.amazonaws.com:amr": "unauthenticated"
+          }
+        },
+        "sts:AssumeRoleWithWebIdentity"
+      )
     });
 
-    unauthPolicy.attachToRole(unauthRole);
+    unauthRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ["s3:ListBucket"],
+        resources: [imageBucket.bucketArn]
+      })
+    );
+
+    new cognito.CfnIdentityPoolRoleAttachment(this, "roleAttachment", {
+      identityPoolId: identityPool.ref,
+      roles: {
+        unauthenticated: unauthRole.roleArn
+      }
+    });
 
     new cdk.CfnOutput(this, "bucketName", {
       value: imageBucket.bucketName

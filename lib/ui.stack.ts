@@ -21,7 +21,7 @@ export class UiStack extends cdk.Stack {
     //     domainName: props.rootDomain
     // });
 
-    const siteBucket = new s3.Bucket(this, "site", {
+    const siteBucket = new s3.Bucket(this, "site-", {
       blockPublicAccess: {
         blockPublicAcls: true,
         ignorePublicAcls: true,
@@ -29,7 +29,6 @@ export class UiStack extends cdk.Stack {
         restrictPublicBuckets: false
       },
       websiteIndexDocument: "index.html",
-      //websiteErrorDocument: "error.html",
       publicReadAccess: true,
       removalPolicy: RemovalPolicy.DESTROY
     });

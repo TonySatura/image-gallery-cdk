@@ -44,7 +44,10 @@ export class PipelineStack extends cdk.Stack {
       }
     });
 
-    const codeBuildProject = new codebuild.PipelineProject(this, "codebuild");
+    const codeBuildProject = new codebuild.PipelineProject(
+      this,
+      props.appName + "-codebuild"
+    );
 
     const angularBuildAction = new codepipelineActions.CodeBuildAction({
       actionName: "AngularBuild",

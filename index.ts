@@ -10,7 +10,7 @@ import {
   EnvironmentStage,
   RepositoryProps
 } from "./lib/stack-props";
-import { ImageBucketStack } from "./lib/image-bucket.stack";
+import { ImagesStack } from "./lib/images.stack";
 
 const app = new cdk.App();
 var branchName = app.node.tryGetContext("branch");
@@ -50,11 +50,7 @@ const baseStackProps: BaseStackProps = {
   }
 };
 
-// const imageBucketStack = new ImageBucketStack(
-//   app,
-//   appName + "imagebucket",
-//   baseStackProps
-// );
+const imagesStack = new ImagesStack(app, appName + "-images", baseStackProps);
 
 const uiStackProps = baseStackProps as UiStackProps;
 uiStackProps.domain = domain;
