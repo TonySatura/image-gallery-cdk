@@ -31,8 +31,24 @@ export class ImagesStack extends cdk.Stack {
     });
 
     const identityPool = new cognito.CfnIdentityPool(this, "identityPool", {
-      identityPoolName: props.appName.replace("-", "_") + "_identityPool",
+      identityPoolName: props.appName.replace("-", "") + "_identityPool",
       allowUnauthenticatedIdentities: true
+    });
+
+    const authRole = new iam.Role(this, "authRole", {
+      roleName: props.appName + "_unauth_role",
+      assumedBy: new iam.FederatedPrincipal(
+        "cognito-identity.amazonaws.com",
+        {
+          StringEquals: {
+            "cognito-identity.amazonaws.com:aud": identityPool.ref
+          },
+          "ForAnyValue:StringLike": {
+            "cognito-identity.amazonaws.com:amr": "authenticated"
+          }
+        },
+        "sts:AssumeRoleWithWebIdentity"
+      )
     });
 
     const unauthRole = new iam.Role(this, "unauthRole", {
@@ -62,6 +78,7 @@ export class ImagesStack extends cdk.Stack {
     new cognito.CfnIdentityPoolRoleAttachment(this, "roleAttachment", {
       identityPoolId: identityPool.ref,
       roles: {
+        authenticated: authRole.roleArn,
         unauthenticated: unauthRole.roleArn
       }
     });
